@@ -57,7 +57,12 @@ val_generator = datagen.flow_from_directory(
 )
 
 num_classes = train_generator.num_classes
-print(f"Num (Improved)
+print(f"Number of classes: {num_classes}")
+print(f"Training samples: {train_generator.samples}")
+print(f"Validation samples: {val_generator.samples}")
+
+# -----------------------------
+# Build Model (Improved CNN Architecture)
 # -----------------------------
 model = Sequential([
     # Block 1
@@ -90,30 +95,19 @@ model = Sequential([
     Dense(256, activation="relu"),
     BatchNormalization(),
     Dropout(0.5),
-print("\nStarting training...")
-history = model.fit(
-    train_generator,
-    validation_data=val_generator,
-    epochs=config.training.IMG_EPOCHS,
-    callbacks=callbacks,
-    verbose=1
+    Dense(num_classes, activation="softmax")
+])
+
+# -----------------------------
+# Compile Model
+# -----------------------------
+model.compile(
+    optimizer="adam",
+    loss="categorical_crossentropy",
+    metrics=["accuracy"]
 )
 
-# -----------------------------
-# Evaluate
-# -----------------------------
-print("\nEvaluating model...")
-val_loss, val_accuracy = model.evaluate(val_generator)
-print(f"Validation Loss: {val_loss:.4f}")
-print(f"Validation Accuracy: {val_accuracy:.4f}")
-
-# -----------------------------
-# Save model
-# -----------------------------
-config.MODEL_DIR.mkdir(parents=True, exist_ok=True)
-model.save(str(config.model.IMAGE_MODEL_PATH))
-
-print(f"\n✅ Image model saved at: {config.model.IMAGE_MODEL_PATH}"
+model.summary()
 
 # -----------------------------
 # Callbacks
@@ -138,25 +132,36 @@ callbacks = [
         min_lr=1e-7,
         verbose=1
     )
-]orical_crossentropy",
-    metrics=["accuracy"]
-)
-
-model.summary()
+]
 
 # -----------------------------
 # Train
 # -----------------------------
+print("\nStarting training...")
 history = model.fit(
     train_generator,
     validation_data=val_generator,
-    epochs=EPOCHS
+    epochs=config.training.IMG_EPOCHS,
+    callbacks=callbacks,
+    verbose=1
 )
+
+# -----------------------------
+# Evaluate
+# -----------------------------
+print("\nEvaluating model...")
+val_loss, val_accuracy = model.evaluate(val_generator)
+print(f"Validation Loss: {val_loss:.4f}")
+print(f"Validation Accuracy: {val_accuracy:.4f}")
 
 # -----------------------------
 # Save model
 # -----------------------------
-os.makedirs("../../models", exist_ok=True)
-model.save(MODEL_SAVE_PATH)
+config.MODEL_DIR.mkdir(parents=True, exist_ok=True)
+model.save(str(config.model.IMAGE_MODEL_PATH))
 
-print("✅ Image model saved at:", MODEL_SAVE_PATH)
+print(f"\n✅ Image model saved at: {config.model.IMAGE_MODEL_PATH}")
+print("\n" + "="*50)
+print("Training completed successfully!")
+print("="*50)
+

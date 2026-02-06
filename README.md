@@ -16,6 +16,14 @@ AI-powered medical diagnosis API providing image-based cancer classification and
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 
+## 📚 Additional Guides
+
+- [UV Package Manager Guide](UV_GUIDE.md) - Complete uv usage reference
+- [Migration Guide: pip → uv](MIGRATION_PIP_TO_UV.md) - Switch from pip to uv
+- [Quick Start Guide](QUICKSTART_COMPLETE.md) - Get running in 5 minutes
+- [Frontend Documentation](frontend/README.md) - Streamlit app guide
+- [Changes Log](CHANGES.md) - Version history and updates
+
 ## ✨ Features
 
 ### 🖼️ Image Classification
@@ -30,6 +38,26 @@ AI-powered medical diagnosis API providing image-based cancer classification and
 - **Confidence Scores**: Provides probability-based risk assessment
 - **Fast Inference**: Optimized Random Forest classifier
 
+### 🎯 Combined Risk Assessment (NEW!)
+- **Comprehensive Analysis**: Combines both image and clinical data for holistic risk evaluation
+- **Risk Meter**: Visual 0-100 risk score with color-coded levels
+- **Smart Recommendations**: Context-aware health guidance based on findings
+- **Weighted Scoring**: Balances imaging (60%) and clinical (40%) insights
+
+### 💬 AI Doctor Agent (NEW!)
+- **LangChain Integration**: Powered by GPT-4 for intelligent medical conversations
+- **Contextual Advice**: Discusses your specific assessment results
+- **Medical Guidance**: Explains findings in plain language
+- **Session Management**: Maintains conversation history and context
+- **Educational Focus**: Provides information while emphasizing professional consultation
+
+### 🌐 Streamlit Frontend (NEW!)
+- **Interactive UI**: User-friendly web interface for complete assessment
+- **Visual Analytics**: Risk gauges, charts, and detailed breakdowns
+- **Real-time Chat**: Integrated AI doctor consultation interface
+- **Responsive Design**: Works on desktop and tablet devices
+- **Status Monitoring**: Live API and model health indicators
+
 ### 🚀 Production Ready
 - **FastAPI Framework**: Modern, fast, async API
 - **Centralized Config**: Easy deployment configuration management
@@ -41,40 +69,53 @@ AI-powered medical diagnosis API providing image-based cancer classification and
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐
-│   Client    │
-│  (Frontend) │
-└──────┬──────┘
-       │ HTTP/HTTPS
-       ▼
-┌─────────────────┐
-│   FastAPI       │
-│   Backend       │
-├─────────────────┤
-│ • CORS          │
-│ • Validation    │
-│ • Logging       │
-└────┬───────┬────┘
-     │       │
-     ▼       ▼
-┌─────────┐ ┌──────────────┐
-│  Image  │ │   Clinical   │
-│  Model  │ │    Model     │
-│ (CNN)   │ │ (RandomF)    │
-└─────────┘ └──────────────┘
+┌──────────────────┐
+│   Streamlit UI   │  ← NEW! Interactive Frontend
+│  (Frontend App)  │
+└────────┬─────────┘
+         │ HTTP/REST
+         ▼
+┌─────────────────────────┐
+│   FastAPI Backend       │
+├─────────────────────────┤
+│ • CORS                  │
+│ • Validation            │
+│ • Logging               │
+│ • Combined Predictions  │  ← NEW!
+│ • AI Doctor Agent       │  ← NEW!
+└────┬─────────┬──────┬───┘
+     │         │      │
+     │         │      └──────────┐
+     ▼         ▼                 ▼
+┌──────────┐ ┌──────────┐  ┌─────────────┐
+│  Image   │ │ Clinical │  │  LangChain  │  ← NEW!
+│  Model   │ │  Model   │  │  + GPT-4    │
+│  (CNN)   │ │ (RF)     │  │ AI Agent    │
+└──────────┘ └──────────┘  └─────────────┘
 ```
 
 ## 📁 Project Structure
 
 ```
-backend/
-├── main.py                      # FastAPI application entry point
+Hospital-AI-Backend/
+├── main.py                      # FastAPI application entry point (UPDATED)
 ├── config.py                    # Centralized configuration management
-├── requirements.txt             # Python dependencies (pip)
-├── pyproject.toml              # Project metadata (uv/pip)
+├── start_app.py                # Quick start script for both services (NEW!)
+├── pyproject.toml              # Project metadata & dependencies (uv-managed)
+├── uv.lock                     # Dependency lock file (uv-generated)
 ├── .env.example                # Environment variables template
 ├── .gitignore                  # Git ignore rules
-├── README.md                   # This file
+│
+├── 📚 Documentation
+├── README.md                   # Main documentation (UPDATED)
+├── QUICKSTART_COMPLETE.md      # 5-minute setup guide (NEW!)
+├── UV_GUIDE.md                 # UV package manager guide (NEW!)
+├── MIGRATION_PIP_TO_UV.md      # Migration guide from pip (NEW!)
+├── CHANGES.md                  # Version history (UPDATED)
+│
+├── frontend/                   # Streamlit Web App (NEW!)
+│   ├── app.py                 # Main Streamlit application
+│   └── README.md              # Frontend documentation
 │
 ├── models/                     # Trained ML models
 │   ├── image_model.h5         # CNN for image classification
@@ -97,8 +138,26 @@ backend/
 ### Prerequisites
 
 - **Python**: 3.12+ (recommended) or 3.10+
-- **pip** or **uv** package manager
+- **uv** package manager ([Install uv](https://github.com/astral-sh/uv))
 - **Git**: For version control
+
+**Why uv?** 
+- ⚡ **10-100x faster** than pip
+- 🔒 **Deterministic installs** with lock file
+- 🎯 **Better dependency resolution**
+- 💾 **Disk space efficient** with global cache
+- 🛠️ **All-in-one tool** for Python project management
+
+> 📖 **Migrating from pip?** See our [Migration Guide](MIGRATION_PIP_TO_UV.md)
+
+**Install uv (if not already installed):**
+```bash
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Linux/Mac
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ### Step 1: Clone Repository
 
@@ -109,42 +168,66 @@ cd backend
 
 ### Step 2: Create Virtual Environment
 
-**Using venv:**
+**Using uv (recommended):**
 ```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
+# Create virtual environment
+uv venv
+
+# Activate on Windows
+.venv\Scripts\activate
+
+# Activate on Linux/Mac
+source .venv/bin/activate
 ```
 
-**Using uv (faster):**
+**Traditional venv (alternative):**
 ```bash
-uv venv
-.venv\Scripts\activate
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
 ```
 
 ### Step 3: Install Dependencies
 
-**Using pip:**
+**Using uv (recommended):**
 ```bash
-pip install -r requirements.txt
+# Install from pyproject.toml
+uv sync
+
+# OR install in editable mode
+uv pip install -e .
 ```
 
-**Using uv:**
+**Traditional pip (alternative):**
 ```bash
-uv pip install -r requirements.txt
-# OR
-uv sync
+pip install -e .
 ```
+
+> 💡 **New to uv?** Check out our comprehensive [UV Package Manager Guide](UV_GUIDE.md) for tips, tricks, and best practices.
 
 ### Step 4: Set Up Environment
 
 ```bash
 # Copy environment template
-copy .env.example .env
+copy .env.example .env  # Windows
+# OR
+cp .env.example .env    # Linux/Mac
 
-# Edit .env with your settings (optional for development)
+# Edit .env and add your OpenAI API key for AI Doctor feature
+# Get your key from: https://platform.openai.com/api-keys
+```
+
+**Required for AI Doctor Chat:**
+```env
+OPENAI_API_KEY=sk-your-actual-openai-api-key-here
+```
+
+**Optional settings:**
+```env
+API_HOST=0.0.0.0
+API_PORT=8000
+LOG_LEVEL=INFO
+ENVIRONMENT=development
 ```
 
 ## ⚙️ Configuration
@@ -190,7 +273,28 @@ CORS_ORIGINS=https://yourdomain.com
 
 ## 🚀 Usage
 
-### Start Development Server
+### Quick Start (Recommended)
+
+Start both backend and frontend with one command:
+
+```bash
+python start_app.py
+```
+
+This will:
+1. Check for required .env file and models
+2. Start the FastAPI backend on port 8000
+3. Start the Streamlit frontend on port 8501
+4. Auto-open the web interface
+
+Access:
+- 🌐 **Web App**: http://localhost:8501
+- 📡 **API**: http://localhost:8000
+- 📚 **API Docs**: http://localhost:8000/docs
+
+### Manual Start
+
+#### Backend Only
 
 ```bash
 # Method 1: Direct Python
@@ -203,7 +307,21 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 uv run python main.py
 ```
 
-The API will be available at:
+#### Frontend Only
+
+```bash
+# From root directory
+streamlit run frontend/app.py
+
+# OR from frontend directory
+cd frontend
+streamlit run app.py
+```
+
+The frontend will be available at:
+- **Web App**: http://localhost:8501
+
+The backend API will be available at:
 - **Base URL**: http://localhost:8000
 - **Interactive Docs**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
@@ -338,6 +456,122 @@ curl -X POST http://localhost:8000/predict-clinical \
 }
 ```
 
+### 5. Combined Risk Assessment (NEW!)
+
+**POST** `/predict-combined`
+
+Comprehensive risk assessment combining both image analysis and clinical data.
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Body: `file` (image) + clinical data fields
+
+**Example (Python):**
+```python
+import requests
+
+with open("scan.jpg", "rb") as f:
+    response = requests.post(
+        "http://localhost:8000/predict-combined",
+        files={"file": f},
+        data={
+            "age": 55,
+            "gender": 1,
+            "smoking": 1,
+            "alcohol": 0,
+            "bmi": 27.5,
+            "wbc": 10.2,
+            "hemoglobin": 12.8,
+            "platelets": 310000
+        }
+    )
+print(response.json())
+```
+
+**Response:**
+```json
+{
+  "overall_risk_score": 68.5,
+  "risk_level": "High Risk",
+  "image_prediction": "lung_cancer",
+  "image_confidence": 0.923,
+  "clinical_prediction": "High Risk",
+  "clinical_confidence": 0.87,
+  "recommendations": [
+    "⚠️ Immediate consultation with a healthcare provider is recommended",
+    "Bring all test results and imaging to your appointment",
+    "Discuss lung cancer findings with a specialist"
+  ]
+}
+```
+
+**Risk Levels:**
+- **Low Risk**: Score 0-30 (Green)
+- **Moderate Risk**: Score 30-60 (Orange)
+- **High Risk**: Score 60-100 (Red)
+
+### 6. AI Doctor Chat (NEW!)
+
+**POST** `/chat`
+
+Conversational AI agent for medical advice and consultation.
+
+**Request Body:**
+```json
+{
+  "message": "What do my test results mean?",
+  "session_id": "session_123"
+}
+```
+
+**Fields:**
+- `message`: User's question or message
+- `session_id`: Optional. If omitted, creates new session
+
+**Example (cURL):**
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What should I do about my high risk score?",
+    "session_id": "session_123"
+  }'
+```
+
+**Response:**
+```json
+{
+  "response": "Based on your high risk assessment...",
+  "session_id": "session_123",
+  "timestamp": "2026-02-06T10:30:45.123456"
+}
+```
+
+**Features:**
+- Maintains conversation context per session
+- Provides medical guidance based on assessment results
+- Explains medical terms in plain language
+- Emphasizes professional consultation when needed
+
+### 7. End Chat Session (NEW!)
+
+**DELETE** `/chat/{session_id}`
+
+Ends a chat session and clears conversation history.
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:8000/chat/session_123
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Session ended"
+}
+```
+
 ## 🎓 Training Models
 
 ### Train Image Classification Model
@@ -398,9 +632,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install uv
+RUN pip install uv
+
 # Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+RUN uv pip install --system -e .
 
 # Copy application
 COPY . .
@@ -418,21 +655,25 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 **Build and run:**
 ```bash
 docker build -t hospital-ai-backend .
-docker run -p 8000:8000 -v ./models:/app/models hospital-ai-backend
+docker run -p 8000:8000 -v ./models:/app/models -e OPENAI_API_KEY=your_key hospital-ai-backend
 ```
 
 ### Cloud Deployment
 
 #### AWS EC2
 ```bash
-# Install dependencies
+# Install Python and uv
 sudo yum update -y
 sudo yum install python3-pip -y
 
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # Clone and setup
 git clone <repo>
-cd backend
-pip3 install -r requirements.txt
+cd Hospital-AI-Backend
+uv sync
 
 # Run with systemd or PM2
 ```
@@ -442,15 +683,20 @@ pip3 install -r requirements.txt
 # Create Procfile
 echo "web: uvicorn main:app --host 0.0.0.0 --port \$PORT" > Procfile
 
+# Create runtime.txt for Python version
+echo "python-3.12" > runtime.txt
+
 # Deploy
 heroku create hospital-ai-backend
+heroku config:set OPENAI_API_KEY=your_key
 git push heroku main
 ```
 
 #### Railway / Render
 - Connect GitHub repository
-- Set build command: `pip install -r requirements.txt`
+- Set build command: `pip install uv && uv sync`
 - Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Add environment variable: `OPENAI_API_KEY=your_key`
 
 ## 🧪 Testing
 
@@ -495,7 +741,47 @@ wrk -t4 -c100 -d30s http://localhost:8000/
 
 **Solution:**
 ```bash
-pip install -r requirements.txt
+# Using uv (recommended)
+uv sync --reinstall
+
+# OR
+uv pip install -e . --reinstall
+
+# Traditional pip
+pip install -e .
+```
+
+### uv Installation Issues
+
+**Problem:** `uv: command not found`
+
+**Solution:**
+```bash
+# Install uv
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Linux/Mac
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Verify installation
+uv --version
+```
+
+### Dependency Resolution Errors
+
+**Problem:** Conflicts with pandas or pillow versions
+
+**Solution:**
+Streamlit requires specific version ranges:
+- `pandas>=2.0.0,<3` (not 3.x)
+- `pillow>=10.0.0,<12` (not 12.x)
+
+These constraints are already set in `pyproject.toml`. If you encounter issues:
+```bash
+# Clear cache and reinstall
+uv cache clean
+uv sync --reinstall
 ```
 
 ### Port Already in Use
